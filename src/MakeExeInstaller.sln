@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakeExeInstaller", "MakeExeInstaller\MakeExeInstaller.csproj", "{11F01D90-3723-4F0F-8AA1-E4C0F0E46C1F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{11F01D90-3723-4F0F-8AA1-E4C0F0E46C1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11F01D90-3723-4F0F-8AA1-E4C0F0E46C1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11F01D90-3723-4F0F-8AA1-E4C0F0E46C1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11F01D90-3723-4F0F-8AA1-E4C0F0E46C1F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E2F5D611-52EB-4656-B60B-55BF6AC666A0}
+	EndGlobalSection
+EndGlobal
