@@ -13,7 +13,7 @@
         AllowsTransparency="True"
         Background="Transparent"
         Title="测试安装程序" Height="450" Width="800"
-        TextElement.Foreground="{StaticResource light}"
+        TextElement.Foreground="{StaticResource dark}"
         ResizeMode="NoResize"
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=ViewModel}">
 
@@ -21,7 +21,7 @@
         <WindowChrome CaptionHeight="32"></WindowChrome>
     </WindowChrome.WindowChrome>
 
-    <Border Background="{StaticResource darkOpacity}">
+    <Border Background="{StaticResource bagroundBrush}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="32"/>
@@ -35,13 +35,12 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal">
                         <Image Height="18" Source="app.ico"/>
-                        <TextBlock Margin="6 0" VerticalAlignment="Center" Foreground="{StaticResource darkOpacity}">测试安装程序</TextBlock>
+                        <TextBlock Margin="6 0" VerticalAlignment="Center" Foreground="{StaticResource dark}">测试安装程序</TextBlock>
                     </StackPanel>
                     <StackPanel Grid.Column="1">
-                        <Button Style="{StaticResource window_close_style}" Click="WindowClose">
-                            <svg:SVGImage Height="10" Width="10"
+                        <Button Style="{StaticResource button_error}" Margin="0" VerticalAlignment="Center" Padding="2" Click="WindowClose">
+                            <svg:SVGImage Height="8" Width="8"
                                           UriSource="/Assets/close.svg"
-                                          RenderTransformOrigin="0.5,0.5" 
                                           VerticalContentAlignment="Center" 
                                           HorizontalContentAlignment="Center" 
                                           Margin="3"/>
