@@ -10,6 +10,7 @@ namespace MakeExeInstaller.ViewModels
     {
         static readonly string _namespace = typeof(MainViewModel).Namespace;
         int index = -1;
+        bool closeWindowButtonEnabled = true;
         UserControl currentPage;
 
         public MainViewModel()
@@ -17,8 +18,8 @@ namespace MakeExeInstaller.ViewModels
             Pages = new List<UserControl>
             {
                 CreatePage<Agreement,AgreementViewModel>(),
-                CreatePage<Dependency,DependencyViewModel>(),
                 CreatePage<Disclaimer,DisclaimerViewModel>(),
+                CreatePage<Dependency,DependencyViewModel>(),
                 CreatePage<Install,InstallViewModel>(),
             };
             Index = 0;
@@ -36,6 +37,17 @@ namespace MakeExeInstaller.ViewModels
                 currentPage = Pages[index];
                 OnPropertyChanged(nameof(Index));
                 OnPropertyChanged(nameof(CurrentPage));
+            }
+        }
+
+        public bool CloseWindowButtonEnabled
+        {
+            get => closeWindowButtonEnabled;
+            set
+            {
+                if (closeWindowButtonEnabled == value) return;
+                closeWindowButtonEnabled = value;
+                OnPropertyChanged(nameof(CloseWindowButtonEnabled));
             }
         }
 

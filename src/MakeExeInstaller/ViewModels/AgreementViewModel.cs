@@ -1,4 +1,5 @@
 ﻿using MakeExeInstaller.Mvvm;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace MakeExeInstaller.ViewModels
@@ -13,16 +14,18 @@ namespace MakeExeInstaller.ViewModels
 
         public AsyncRelayCommand AgreeCommand { get; }
 
-        void Agree(object parameter)
+        async Task Agree(object parameter)
         {
             MainViewModel.Index++;
+            await Task.CompletedTask;
         }
 
         public AsyncRelayCommand DisAgreeCommand { get; }
 
-        void DisAgree(object parameter)
+        async Task DisAgree(object parameter)
         {
-            Application.Current.Dispatcher.Invoke(() => Application.Current.Shutdown());
+            Application.Current.Shutdown();
+            await Task.CompletedTask;
         }
     }
 }

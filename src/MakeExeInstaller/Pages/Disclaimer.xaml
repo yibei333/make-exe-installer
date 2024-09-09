@@ -5,9 +5,28 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:MakeExeInstaller.Pages"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800">
+      d:DesignHeight="200" d:DesignWidth="300" d:Background="{StaticResource bagroundBrush}"
+      Background="Transparent"
+      DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=ViewModel}">
 
     <Grid>
-        <TextBlock>this is disclaimer</TextBlock>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid>
+            <RichTextBox IsReadOnly="True" Margin="6" Padding="6">
+                <FlowDocument>
+                    <Paragraph FontWeight="Black">免责声明</Paragraph>
+                    <Paragraph>请注意备份文件，由该程序导致的任何问题，开发者不承担任何责任</Paragraph>
+                </FlowDocument>
+            </RichTextBox>
+        </Grid>
+        <Grid Grid.Row="1">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="6">
+                <Button Style="{StaticResource button_default}" Command="{Binding DisAgreeCommand}">不同意</Button>
+                <Button Style="{StaticResource button_success}" Margin="12 0 0 0" Command="{Binding AgreeCommand}">同意</Button>
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

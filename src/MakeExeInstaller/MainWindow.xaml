@@ -3,16 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MakeExeInstaller"
-        xmlns:svg="https://github.com/dotnetprojects/SVGImage"
-        xmlns:attach="clr-namespace:MakeExeInstaller.AttachProperties"
+        xmlns:local="clr-namespace:MakeExeInstaller.Extensions"
         mc:Ignorable="d"
         ShowInTaskbar="False"
         WindowStyle="None"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="True"
-        Background="Transparent"
-        Title="测试安装程序" Height="450" Width="800"
+        Background="Transparent" Height="200" Width="300"
         TextElement.Foreground="{StaticResource dark}"
         ResizeMode="NoResize"
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=ViewModel}">
@@ -28,22 +25,24 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Grid Background="{StaticResource light}">
-                <Grid Margin="6" VerticalAlignment="Center" WindowChrome.IsHitTestVisibleInChrome="True">
+                <Grid Margin="6" VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal">
-                        <Image Height="18" Source="app.ico"/>
+                        <Image Height="18" Source="/Data/app.ico"/>
                         <TextBlock Margin="6 0" VerticalAlignment="Center" Foreground="{StaticResource dark}">测试安装程序</TextBlock>
                     </StackPanel>
                     <StackPanel Grid.Column="1">
-                        <Button Style="{StaticResource button_error}" Margin="0" VerticalAlignment="Center" Padding="2" Click="WindowClose">
-                            <svg:SVGImage Height="8" Width="8"
-                                          UriSource="/Assets/close.svg"
-                                          VerticalContentAlignment="Center" 
-                                          HorizontalContentAlignment="Center" 
-                                          Margin="3"/>
+                        <Button Style="{StaticResource button_error}" 
+                                WindowChrome.IsHitTestVisibleInChrome="True"
+                                Margin="0" 
+                                VerticalAlignment="Center" 
+                                Padding="4" 
+                                Click="WindowClose"
+                                IsEnabled="{Binding CloseWindowButtonEnabled}">
+                            <Path Data="{x:Static local:XGeometries.Close}" Style="{StaticResource XWindowCaptionPathStyle}"/>
                         </Button>
                     </StackPanel>
                 </Grid>

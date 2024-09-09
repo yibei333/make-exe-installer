@@ -9,7 +9,7 @@ namespace MakeExeInstaller.Mvvm
         public event EventHandler CanExecuteChanged;
         bool _isRunning;
 
-        public AsyncRelayCommand(Action<object> onExecute)
+        public AsyncRelayCommand(Func<object, Task> onExecute)
         {
             OnExecute = onExecute;
         }
@@ -25,7 +25,7 @@ namespace MakeExeInstaller.Mvvm
             }
         }
 
-        Action<object> OnExecute { get; }
+        Func<object, Task> OnExecute { get; }
 
         public bool CanExecute(object parameter)
         {
@@ -35,10 +35,17 @@ namespace MakeExeInstaller.Mvvm
         public void Execute(object parameter)
         {
             IsRunning = true;
-            Task.Run(() =>
+            OnExecute(parameter).ContinueWith((_) =>
             {
-                OnExecute(parameter);
-            }).ContinueWith((_) => IsRunning = false);
+                IsRunning = false;
+            });
+        }
+
+        public async Task ExecuteAsync(object parameter)
+        {
+            IsRunning = true;
+            await OnExecute(parameter);
+            IsRunning = false;
         }
     }
 }

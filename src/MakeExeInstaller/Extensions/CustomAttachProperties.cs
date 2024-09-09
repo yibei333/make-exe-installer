@@ -1,10 +1,10 @@
 ﻿using System.Windows;
 
-namespace MakeExeInstaller.AttachProperties
+namespace MakeExeInstaller.Extensions
 {
-    public static class RadiusAttachProperty
+    public static class CustomAttachProperties
     {
-        public static DependencyProperty RadiusProperty = DependencyProperty.RegisterAttached("Radius", typeof(CornerRadius), typeof(RadiusAttachProperty));
+        public static DependencyProperty RadiusProperty = DependencyProperty.RegisterAttached("Radius", typeof(CornerRadius), typeof(CustomAttachProperties));
 
         public static CornerRadius GetRadius(DependencyObject obj) => (CornerRadius)obj.GetValue(RadiusProperty);
 
