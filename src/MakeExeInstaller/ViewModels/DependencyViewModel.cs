@@ -103,7 +103,7 @@ namespace MakeExeInstaller.ViewModels
         {
             State = DependencyState.Running;
             var assembly = Assembly.GetExecutingAssembly();
-            var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.Data.Dependencies.EnsureWebview2RuntimeInstalled.exe");
+            var stream = assembly.GetManifestResourceStream($"Data/Dependencies/EnsureWebview2RuntimeInstalled.exe");
             if (stream is null)
             {
                 State = DependencyState.Error;
