@@ -1,4 +1,5 @@
 ﻿using MakeExeInstaller.Mvvm;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace MakeExeInstaller.ViewModels
@@ -14,6 +15,10 @@ namespace MakeExeInstaller.ViewModels
             //    var y = assembly.GetManifestResourceInfo(x);
             //    var stream = assembly.GetManifestResourceStream(x);
             //}
+
+            //var a = Process.GetProcessesByName("SharpDevTool").FirstOrDefault();
+            //a?.Kill();
+            //a?.Dispose();
         }
     }
 }
