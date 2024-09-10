@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:MakeExeInstaller.Pages"
       mc:Ignorable="d" 
-      d:DesignHeight="200" d:DesignWidth="300" d:Background="{StaticResource bagroundBrush}"
+      d:DesignHeight="300" d:DesignWidth="500" d:Background="{StaticResource bagroundBrush}"
       Background="Transparent"
       DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=ViewModel}">
 

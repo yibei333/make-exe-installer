@@ -5,11 +5,50 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:MakeExeInstaller.Pages"
       mc:Ignorable="d"
-      d:DesignHeight="200" d:DesignWidth="300" d:Background="{StaticResource bagroundBrush}"
+      d:DesignHeight="300" d:DesignWidth="500" d:Background="{StaticResource bagroundBrush}"
       Background="Transparent"
       DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=ViewModel}">
 
     <Grid>
-        <TextBlock>this is install</TextBlock>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Margin="6">
+            <StackPanel>
+                <TextBlock FontWeight="Bold" FontSize="16">安装位置</TextBlock>
+                <Border BorderThickness="1" 
+                        BorderBrush="{StaticResource gray}" 
+                        CornerRadius="4"
+                        Background="{StaticResource light}"
+                        Margin="0 6"
+                        Padding="2">
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Padding="6 0" 
+                                 Background="Transparent" 
+                                 BorderThickness="0" 
+                                 VerticalAlignment="Center"
+                                 Text="{Binding TargetPath}"/>
+                        <Button Grid.Column="1" 
+                                Style="{StaticResource button_primary}"
+                                Command="{Binding SelectPathCommand}">选择</Button>
+                    </Grid>
+                </Border>
+                <Border BorderThickness="1" BorderBrush="{StaticResource gray}" Padding="6" CornerRadius="4">
+                    <StackPanel>
+                        <TextBlock FontSize="14">提示</TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="{StaticResource blue}" Margin="6">1.应避免选择系统路径,如'C:\Windows\System32'等</TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="{StaticResource blue}" Margin="6">2.不要选择带有中文或者特殊字符的路径</TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+        <StackPanel Grid.Row="1" HorizontalAlignment="Right" Margin="6">
+            <Button Style="{StaticResource button_success}" Command="{Binding InstallCommmand}" IsEnabled="{Binding InstallCommmand.IsRunning,Converter={StaticResource boolReverseConverter}}">安装</Button>
+        </StackPanel>
     </Grid>
 </UserControl>

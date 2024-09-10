@@ -21,6 +21,7 @@ namespace MakeExeInstaller.ViewModels
                 CreatePage<Disclaimer,DisclaimerViewModel>(),
                 CreatePage<Dependency,DependencyViewModel>(),
                 CreatePage<Install,InstallViewModel>(),
+                CreatePage<Complete,CompleteViewModel>(),
             };
             Index = 0;
         }

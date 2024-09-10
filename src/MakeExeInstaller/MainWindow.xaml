@@ -9,7 +9,7 @@
         WindowStyle="None"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="True"
-        Background="Transparent" Height="200" Width="300"
+        Background="Transparent" Height="300" Width="500"
         TextElement.Foreground="{StaticResource dark}"
         ResizeMode="NoResize"
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=ViewModel}">

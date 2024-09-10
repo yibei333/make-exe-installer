@@ -1,77 +1,165 @@
-﻿using MakeExeInstaller.Mvvm;
+﻿using MakeExeInstaller.Extensions;
+using MakeExeInstaller.Mvvm;
 using System;
 using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MakeExeInstaller.ViewModels
 {
     public class InstallViewModel : PageViewModelBase
     {
+        string _targetPath;
+
         public InstallViewModel(MainViewModel mainViewModel) : base(mainViewModel)
         {
-            //var assembly = Assembly.GetExecutingAssembly();
-            //var xx = assembly.GetManifestResourceNames();
-            //foreach (var x in xx)
-            //{
-            //    var y = assembly.GetManifestResourceInfo(x);
-            //    var stream = assembly.GetManifestResourceStream(x);
-            //}
-
-            //var a = Process.GetProcessesByName("SharpDevTool").FirstOrDefault();
-            //a?.Kill();
-            //a?.Dispose();
-
-            //appShortcutToDesktop("test");
+            TargetPath = RegistryExtension.Get();
+            if(TargetPath.IsNullOrWhiteSpace()) TargetPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            SelectPathCommand = new AsyncRelayCommand(SelectPath);
+            InstallCommmand = new AsyncRelayCommand(Install);
         }
 
-        //private void appShortcutToDesktop(string linkName)
-        //{
-        //    IShellLink link = (IShellLink)new ShellLink();
+        public string TargetPath
+        {
+            get => _targetPath;
+            set
+            {
+                if (_targetPath == value) return;
+                _targetPath = value;
+                OnPropertyChanged(nameof(TargetPath));
+            }
+        }
 
-        //    // setup shortcut information
-        //    link.SetDescription($"{linkName} description");
-        //    string app = Assembly.GetExecutingAssembly().Location;
-        //    link.SetPath(app);
+        public AsyncRelayCommand SelectPathCommand { get; }
 
-        //    // save it
-        //    IPersistFile file = (IPersistFile)link;
-        //    string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-        //    file.Save(Path.Combine(desktopPath, $"{linkName}.lnk"), false);
-        //}
+        async Task SelectPath(object parameter)
+        {
+            var dialog = new FolderBrowserDialog { Description = "选择安装位置" };
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                TargetPath = dialog.SelectedPath;
+            }
+            await Task.CompletedTask;
+        }
 
-        //[ComImport]
-        //[Guid("00021401-0000-0000-C000-000000000046")]
-        //internal class ShellLink
-        //{
-        //}
+        public AsyncRelayCommand InstallCommmand { get; }
 
-        //[ComImport]
-        //[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        //[Guid("000214F9-0000-0000-C000-000000000046")]
-        //internal interface IShellLink
-        //{
-        //    void GetPath([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszFile, int cchMaxPath, out IntPtr pfd, int fFlags);
-        //    void GetIDList(out IntPtr ppidl);
-        //    void SetIDList(IntPtr pidl);
-        //    void GetDescription([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszName, int cchMaxName);
-        //    void SetDescription([MarshalAs(UnmanagedType.LPWStr)] string pszName);
-        //    void GetWorkingDirectory([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszDir, int cchMaxPath);
-        //    void SetWorkingDirectory([MarshalAs(UnmanagedType.LPWStr)] string pszDir);
-        //    void GetArguments([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszArgs, int cchMaxPath);
-        //    void SetArguments([MarshalAs(UnmanagedType.LPWStr)] string pszArgs);
-        //    void GetHotkey(out short pwHotkey);
-        //    void SetHotkey(short wHotkey);
-        //    void GetShowCmd(out int piShowCmd);
-        //    void SetShowCmd(int iShowCmd);
-        //    void GetIconLocation([Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszIconPath, int cchIconPath, out int piIcon);
-        //    void SetIconLocation([MarshalAs(UnmanagedType.LPWStr)] string pszIconPath, int iIcon);
-        //    void SetRelativePath([MarshalAs(UnmanagedType.LPWStr)] string pszPathRel, int dwReserved);
-        //    void Resolve(IntPtr hwnd, int fFlags);
-        //    void SetPath([MarshalAs(UnmanagedType.LPWStr)] string pszFile);
-        //}
+        async Task Install(object parameter)
+        {
+            var directory = WriteRegistry();
+            if (directory is null) return;
+
+            StopRunningApp(directory);
+            RemoveExistFilesByManifest(directory);
+
+            var fileListPath = directory.CombinePath("app.file.list");
+            var fileList = new StringBuilder();
+            CopyFiles(directory, fileList);
+            CreateShortcut(directory, fileList);
+            File.WriteAllText(fileListPath, fileList.ToString());
+
+            MainViewModel.Index++;
+            await Task.CompletedTask;
+        }
+
+        string WriteRegistry()
+        {
+            if (string.IsNullOrWhiteSpace(TargetPath))
+            {
+                MessageBox.Show("请选择安装位置");
+                return null;
+            }
+
+            try
+            {
+                RegistryExtension.Set(TargetPath);
+                var path = Path.Combine(TargetPath, App.Config.Name);
+                if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+                return path;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                return null;
+            }
+        }
+
+        void StopRunningApp(string directory)
+        {
+            var exePath = Path.Combine(directory, App.Config.ExePath).FormatPath();
+            var processes = Process.GetProcessesByName(App.Config.Name).Where(x => x.StartInfo.FileName.FormatPath() == exePath).ToList();
+            if (processes.Any())
+            {
+                if (MessageBox.Show("确定停止正在运行的程序?", "消息确认", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                {
+                    processes.ForEach(process =>
+                    {
+                        process.Kill();
+                        process.Dispose();
+                    });
+                }
+            }
+        }
+
+        void RemoveExistFilesByManifest(string directory)
+        {
+            var fileListPath = directory.CombinePath("app.file.list");
+            if (File.Exists(fileListPath))
+            {
+                var lines = File.ReadAllLines(fileListPath);
+                foreach (var line in lines)
+                {
+                    if (line.StartsWith("file:"))
+                    {
+                        var path = line.TrimStart("file:");
+                        if (Path.IsPathRooted(path)) File.Delete(path);
+                        directory.CombinePath(path).RemoveFileIfExist();
+                    }
+                    else if (line.StartsWith("folder:"))
+                    {
+                        var path = line.TrimStart("folder:");
+                        if (Path.IsPathRooted(path)) Directory.Delete(path, true);
+                        var localDirectory = directory.CombinePath(path);
+                        if (Directory.Exists(localDirectory)) Directory.Delete(localDirectory, true);
+                    }
+                }
+            }
+        }
+
+        void CopyFiles(string directory, StringBuilder fileList)
+        {
+
+            var binPath = directory.CombinePath("bin");
+            binPath.CreateDirectoryIfNotExist();
+
+            var emmebedFiles = App.Assembly.GetManifestResourceNames();
+            foreach (var file in emmebedFiles)
+            {
+                if (!file.StartsWith("Data/Bin")) continue;
+                var targetPath = binPath.CombinePath(file.TrimStart("Data/Bin/"));
+                new FileInfo(targetPath).DirectoryName.CreateDirectoryIfNotExist();
+                fileList.AppendLine($"file:bin/{file.TrimStart("Data/Bin/")}");
+                var stream = App.Assembly.GetManifestResourceStream(file);
+                stream.SaveToFile(targetPath);
+            }
+        }
+
+        void CreateShortcut(string directory, StringBuilder fileList)
+        {
+            var path = ShortcutExtension.CreateShortcutToDesktop(directory);
+            var name = path.GetFileName();
+            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory).CombinePath(name);
+            fileList.AppendLine($"file:{desktopPath}");
+            File.Copy(path, desktopPath);
+
+            var startMenuDirectory = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu).CombinePath($"Programs/{App.Config.Name}");
+            startMenuDirectory.CreateDirectoryIfNotExist();
+            fileList.AppendLine($"folder:{startMenuDirectory}");
+            var startMenuPath = startMenuDirectory.CombinePath(name);
+            File.Copy(path, startMenuPath);
+        }
     }
 }

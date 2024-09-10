@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakeExeInstaller", "MakeExeInstaller\MakeExeInstaller.csproj", "{11F01D90-3723-4F0F-8AA1-E4C0F0E46C1F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MakeExeInstaller.Tool", "MakeExeInstaller.Tool\MakeExeInstaller.Tool.csproj", "{EF0B2CF3-B896-42EB-98E5-EA533650A057}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{11F01D90-3723-4F0F-8AA1-E4C0F0E46C1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11F01D90-3723-4F0F-8AA1-E4C0F0E46C1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11F01D90-3723-4F0F-8AA1-E4C0F0E46C1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF0B2CF3-B896-42EB-98E5-EA533650A057}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF0B2CF3-B896-42EB-98E5-EA533650A057}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF0B2CF3-B896-42EB-98E5-EA533650A057}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF0B2CF3-B896-42EB-98E5-EA533650A057}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

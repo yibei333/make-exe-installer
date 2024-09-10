@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0"
-  xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -54,6 +53,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <NoWarn>CS0067</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>87679B1727720CE4094B578B7C1CB51C6BB202E6</ManifestCertificateThumbprint>
@@ -62,14 +62,22 @@
     <ManifestKeyFile>MakeExeInstaller_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>true</SignManifests>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -88,6 +96,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Extensions\ShortcutExtension.cs" />
+    <Compile Include="Extensions\StringExtension.cs" />
+    <Compile Include="Extensions\FileExtension.cs" />
+    <Compile Include="Extensions\JsonExtension.cs" />
+    <Compile Include="Extensions\RegistryExtension.cs" />
     <Compile Include="Extensions\XGeometries.cs" />
     <Compile Include="Extensions\BaseControl.cs" />
     <Compile Include="Extensions\BuiltInCommand.cs" />
@@ -97,7 +110,11 @@
     <Compile Include="Mvvm\AsyncRelayCommand.cs" />
     <Compile Include="Mvvm\IViewModelUserControl.cs" />
     <Compile Include="Mvvm\PageViewModelBase.cs" />
+    <Compile Include="Pages\Complete.xaml.cs">
+      <DependentUpon>Complete.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModels\DependencyViewModel.cs" />
+    <Compile Include="ViewModels\CompleteViewModel.cs" />
     <Compile Include="ViewModels\DisclaimerViewModel.cs" />
     <Compile Include="ViewModels\InstallViewModel.cs" />
     <Compile Include="ViewModels\AgreementViewModel.cs" />
@@ -122,6 +139,10 @@
     <Page Include="Pages\Dependency.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Complete.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Pages\Disclaimer.xaml">
       <SubType>Designer</SubType>
@@ -162,7 +183,8 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="MakeExeInstaller_TemporaryKey.pfx" />
+    <None Include="app.manifest" />
+    <None Include="Data\config.json" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
