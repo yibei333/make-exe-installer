@@ -17,7 +17,7 @@ namespace MakeExeInstaller.ViewModels
         public InstallViewModel(MainViewModel mainViewModel) : base(mainViewModel)
         {
             TargetPath = RegistryExtension.Get();
-            if(TargetPath.IsNullOrWhiteSpace()) TargetPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            if (TargetPath.IsNullOrWhiteSpace()) TargetPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
             SelectPathCommand = new AsyncRelayCommand(SelectPath);
             InstallCommmand = new AsyncRelayCommand(Install);
         }

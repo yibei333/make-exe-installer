@@ -39,14 +39,15 @@ namespace MakeExeInstaller.ViewModels
                     var process = new Process
                     {
                         StartInfo = new ProcessStartInfo(exe)
+                        {
+                            WorkingDirectory = new FileInfo(exe).DirectoryName
+                        }
                     };
                     process.Start();
-                    process.WaitForExit();
                 }
-
-                Application.Current.Shutdown();
-                await Task.CompletedTask;
             }
+            Application.Current.Shutdown();
+            await Task.CompletedTask;
         }
     }
 }

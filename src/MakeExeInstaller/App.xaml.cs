@@ -17,7 +17,7 @@ namespace MakeExeInstaller
             var bytes = new byte[stream.Length];
             stream.Read(bytes, 0, bytes.Length);
             stream.Dispose();
-            var json=Encoding.UTF8.GetString(bytes);
+            var json = Encoding.UTF8.GetString(bytes);
             return json.DeSerialize<AppConfig>();
         }
     }
