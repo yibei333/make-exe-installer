@@ -1,6 +1,7 @@
 ﻿using MakeExeInstaller.Extensions;
 using MakeExeInstaller.Mvvm;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -49,15 +50,17 @@ namespace MakeExeInstaller.ViewModels
 
         async Task Install(object parameter)
         {
-            var directory = WriteRegistry();
-            if (directory is null) return;
+            if (!Verify(out var emmebedFiles)) return;
+            var directory = Path.Combine(TargetPath, App.Config.Name);
+            if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
 
+            WriteRegistry();
             StopRunningApp(directory);
             RemoveExistFilesByManifest(directory);
 
             var fileListPath = directory.CombinePath("app.file.list");
             var fileList = new StringBuilder();
-            CopyFiles(directory, fileList);
+            CopyFiles(directory, emmebedFiles, fileList);
             CreateShortcut(directory, fileList);
             File.WriteAllText(fileListPath, fileList.ToString());
 
@@ -65,26 +68,34 @@ namespace MakeExeInstaller.ViewModels
             await Task.CompletedTask;
         }
 
-        string WriteRegistry()
+        bool Verify(out List<string> emmebedFiles)
         {
+            emmebedFiles = new List<string>();
             if (string.IsNullOrWhiteSpace(TargetPath))
             {
                 MessageBox.Show("请选择安装位置");
-                return null;
+                return false;
             }
 
-            try
+            emmebedFiles = App.Assembly.GetManifestResourceNames().Where(x => x.StartsWith("Data/Bin/")).Select(x=>x.TrimStart("Data/Bin/")).ToList();
+            if (emmebedFiles.IsNullOrEmpty())
             {
-                RegistryExtension.Set(TargetPath);
-                var path = Path.Combine(TargetPath, App.Config.Name);
-                if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-                return path;
+                MessageBox.Show("二进制文件不能为空");
+                return false;
             }
-            catch (Exception ex)
+
+            if (emmebedFiles.Count(x => x == App.Config.ExePath) != 1)
             {
-                MessageBox.Show(ex.Message);
-                return null;
+                MessageBox.Show("找不到可执行文件");
+                return false;
             }
+
+            return true;
+        }
+
+        void WriteRegistry()
+        {
+            RegistryExtension.Set(TargetPath);
         }
 
         void StopRunningApp(string directory)
@@ -129,20 +140,18 @@ namespace MakeExeInstaller.ViewModels
             }
         }
 
-        void CopyFiles(string directory, StringBuilder fileList)
+        void CopyFiles(string directory, List<string> emmebedFiles, StringBuilder fileList)
         {
 
             var binPath = directory.CombinePath("bin");
             binPath.CreateDirectoryIfNotExist();
 
-            var emmebedFiles = App.Assembly.GetManifestResourceNames();
             foreach (var file in emmebedFiles)
             {
-                if (!file.StartsWith("Data/Bin")) continue;
-                var targetPath = binPath.CombinePath(file.TrimStart("Data/Bin/"));
+                var targetPath = binPath.CombinePath(file);
                 new FileInfo(targetPath).DirectoryName.CreateDirectoryIfNotExist();
-                fileList.AppendLine($"file:bin/{file.TrimStart("Data/Bin/")}");
-                var stream = App.Assembly.GetManifestResourceStream(file);
+                fileList.AppendLine($"file:bin/{file}");
+                var stream = App.Assembly.GetManifestResourceStream($"Data/Bin/{file}");
                 stream.SaveToFile(targetPath);
             }
         }
@@ -155,11 +164,25 @@ namespace MakeExeInstaller.ViewModels
             fileList.AppendLine($"file:{desktopPath}");
             File.Copy(path, desktopPath);
 
-            var startMenuDirectory = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu).CombinePath($"Programs/{App.Config.Name}");
-            startMenuDirectory.CreateDirectoryIfNotExist();
-            fileList.AppendLine($"folder:{startMenuDirectory}");
-            var startMenuPath = startMenuDirectory.CombinePath(name);
-            File.Copy(path, startMenuPath);
+            //var startMenuDirectory = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu).CombinePath($"Programs/{App.Config.Name}");
+            //startMenuDirectory.CreateDirectoryIfNotExist();
+            //fileList.AppendLine($"folder:{startMenuDirectory}");
+            //var startMenuPath = startMenuDirectory.CombinePath(name);
+            //File.Copy(path, startMenuPath);
+
+            //var userStartMenuDirectory = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu).CombinePath($"Programs/{App.Config.Name}");
+            //userStartMenuDirectory.CreateDirectoryIfNotExist();
+            //fileList.AppendLine($"folder:{userStartMenuDirectory}");
+            //var userStartMenuPath = userStartMenuDirectory.CombinePath(name);
+            //File.Copy(path, userStartMenuPath);
+
+            var userStartPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu).CombinePath($"Programs/{name}");
+            fileList.AppendLine($"file:{userStartPath}");
+            File.Copy(path, userStartPath);
+
+            var startPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu).CombinePath($"Programs/{name}");
+            fileList.AppendLine($"file:{startPath}");
+            File.Copy(path, startPath);
         }
     }
 }
