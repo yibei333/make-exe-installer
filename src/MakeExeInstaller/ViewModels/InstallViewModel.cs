@@ -183,6 +183,9 @@ namespace MakeExeInstaller.ViewModels
             var startPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu).CombinePath($"Programs/{name}");
             fileList.AppendLine($"file:{startPath}");
             File.Copy(path, startPath);
+
+            //todo:add app to installed list
+            //todo:modify taskbar name
         }
     }
 }
