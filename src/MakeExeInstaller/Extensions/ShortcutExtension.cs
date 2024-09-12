@@ -8,7 +8,7 @@ namespace MakeExeInstaller.Extensions
     {
         public static string CreateShortcutToDesktop(string directory)
         {
-            string app = directory.CombinePath("bin").CombinePath(App.Config.ExePath);
+            string app = directory.CombinePath(App.Config.ExePath);
             string targetPath = directory.CombinePath($"{App.Config.DisplayName}.lnk");
             Create(targetPath, app, null, App.Config.DisplayName, "Ctrl+Shift+N");
             return targetPath;

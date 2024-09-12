@@ -34,6 +34,9 @@ namespace MakeExeInstaller.ViewModels
             }
         }
 
+        public string ExePath => TargetPath.CombinePath(App.Config.ExePath);
+        public string FileListPath => TargetPath.CombinePath("app.file.list");
+
         public AsyncRelayCommand SelectPathCommand { get; }
 
         async Task SelectPath(object parameter)
@@ -41,7 +44,10 @@ namespace MakeExeInstaller.ViewModels
             var dialog = new FolderBrowserDialog { Description = "选择安装位置" };
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                TargetPath = dialog.SelectedPath;
+                var path = dialog.SelectedPath.FormatPath().TrimEnd("/");
+                if (!path.EndsWith(App.Config.Name)) path = path.CombinePath(App.Config.Name);
+                TargetPath = path;
+
             }
             await Task.CompletedTask;
         }
@@ -51,18 +57,16 @@ namespace MakeExeInstaller.ViewModels
         async Task Install(object parameter)
         {
             if (!Verify(out var emmebedFiles)) return;
-            var directory = Path.Combine(TargetPath, App.Config.Name);
-            if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+            if (!Directory.Exists(TargetPath)) Directory.CreateDirectory(TargetPath);
 
             WriteRegistry();
-            StopRunningApp(directory);
-            RemoveExistFilesByManifest(directory);
+            if (!StopRunningApp()) return;
+            RemoveExistFilesByManifest();
 
-            var fileListPath = directory.CombinePath("app.file.list");
             var fileList = new StringBuilder();
-            CopyFiles(directory, emmebedFiles, fileList);
-            CreateShortcut(directory, fileList);
-            File.WriteAllText(fileListPath, fileList.ToString());
+            CopyFiles(emmebedFiles, fileList);
+            CreateShortcut(fileList);
+            File.WriteAllText(FileListPath, fileList.ToString());
 
             MainViewModel.Index++;
             await Task.CompletedTask;
@@ -77,7 +81,7 @@ namespace MakeExeInstaller.ViewModels
                 return false;
             }
 
-            emmebedFiles = App.Assembly.GetManifestResourceNames().Where(x => x.StartsWith("Data/Bin/")).Select(x=>x.TrimStart("Data/Bin/")).ToList();
+            emmebedFiles = App.Assembly.GetManifestResourceNames().Where(x => x.StartsWith("Data/Bin/")).Select(x => x.TrimStart("Data/Bin/")).ToList();
             if (emmebedFiles.IsNullOrEmpty())
             {
                 MessageBox.Show("二进制文件不能为空");
@@ -98,94 +102,81 @@ namespace MakeExeInstaller.ViewModels
             RegistryExtension.Set(TargetPath);
         }
 
-        void StopRunningApp(string directory)
+        bool StopRunningApp()
         {
-            var exePath = Path.Combine(directory, App.Config.ExePath).FormatPath();
-            var processes = Process.GetProcessesByName(App.Config.Name).Where(x => x.StartInfo.FileName.FormatPath() == exePath).ToList();
-            if (processes.Any())
+            var processes = Process.GetProcessesByName(App.Config.Name).Where(x => x.MainModule.FileName.FormatPath() == ExePath).ToList();
+            if (!processes.Any()) return true;
+
+            if (MessageBox.Show("确定停止正在运行的程序?", "消息确认", MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
-                if (MessageBox.Show("确定停止正在运行的程序?", "消息确认", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                foreach (var process in processes)
                 {
-                    processes.ForEach(process =>
-                    {
-                        process.Kill();
-                        process.Dispose();
-                    });
+                    process.Kill();
+                    process.WaitForExit();
+                    process.Dispose();
                 }
+                return true;
             }
+            else return false;
         }
 
-        void RemoveExistFilesByManifest(string directory)
+        void RemoveExistFilesByManifest()
         {
-            var fileListPath = directory.CombinePath("app.file.list");
-            if (File.Exists(fileListPath))
+            if (File.Exists(FileListPath))
             {
-                var lines = File.ReadAllLines(fileListPath);
+                var lines = File.ReadAllLines(FileListPath);
                 foreach (var line in lines)
                 {
                     if (line.StartsWith("file:"))
                     {
                         var path = line.TrimStart("file:");
                         if (Path.IsPathRooted(path)) File.Delete(path);
-                        directory.CombinePath(path).RemoveFileIfExist();
+                        TargetPath.CombinePath(path).RemoveFileIfExist();
                     }
                     else if (line.StartsWith("folder:"))
                     {
                         var path = line.TrimStart("folder:");
                         if (Path.IsPathRooted(path)) Directory.Delete(path, true);
-                        var localDirectory = directory.CombinePath(path);
+                        var localDirectory = TargetPath.CombinePath(path);
                         if (Directory.Exists(localDirectory)) Directory.Delete(localDirectory, true);
                     }
                 }
             }
         }
 
-        void CopyFiles(string directory, List<string> emmebedFiles, StringBuilder fileList)
+        void CopyFiles(List<string> emmebedFiles, StringBuilder fileList)
         {
-
-            var binPath = directory.CombinePath("bin");
-            binPath.CreateDirectoryIfNotExist();
-
+            int size = 0;
             foreach (var file in emmebedFiles)
             {
-                var targetPath = binPath.CombinePath(file);
+                var targetPath = TargetPath.CombinePath(file);
                 new FileInfo(targetPath).DirectoryName.CreateDirectoryIfNotExist();
-                fileList.AppendLine($"file:bin/{file}");
+                fileList.AppendLine($"file:{file}");
                 var stream = App.Assembly.GetManifestResourceStream($"Data/Bin/{file}");
                 stream.SaveToFile(targetPath);
+                size += (int)stream.Length;
             }
+            RegistryExtension.SetSystemSizeInformation(size / 1024);
         }
 
-        void CreateShortcut(string directory, StringBuilder fileList)
+        void CreateShortcut(StringBuilder fileList)
         {
-            var path = ShortcutExtension.CreateShortcutToDesktop(directory);
+            var path = ShortcutExtension.CreateShortcutToDesktop(TargetPath);
             var name = path.GetFileName();
+
+            //desktop
             var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory).CombinePath(name);
             fileList.AppendLine($"file:{desktopPath}");
             File.Copy(path, desktopPath);
 
-            //var startMenuDirectory = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu).CombinePath($"Programs/{App.Config.Name}");
-            //startMenuDirectory.CreateDirectoryIfNotExist();
-            //fileList.AppendLine($"folder:{startMenuDirectory}");
-            //var startMenuPath = startMenuDirectory.CombinePath(name);
-            //File.Copy(path, startMenuPath);
-
-            //var userStartMenuDirectory = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu).CombinePath($"Programs/{App.Config.Name}");
-            //userStartMenuDirectory.CreateDirectoryIfNotExist();
-            //fileList.AppendLine($"folder:{userStartMenuDirectory}");
-            //var userStartMenuPath = userStartMenuDirectory.CombinePath(name);
-            //File.Copy(path, userStartMenuPath);
-
+            //user start
+            //user start path->C:\Users\{user}\AppData\Roaming\Microsoft\Windows\Start Menu\Programs
+            //system start path->C:\ProgramData\Microsoft\Windows\Start Menu\Programs
             var userStartPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu).CombinePath($"Programs/{name}");
             fileList.AppendLine($"file:{userStartPath}");
             File.Copy(path, userStartPath);
 
-            var startPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu).CombinePath($"Programs/{name}");
-            fileList.AppendLine($"file:{startPath}");
-            File.Copy(path, startPath);
-
-            //todo:add app to installed list
-            //todo:modify taskbar name
+            path.RemoveFileIfExist();
         }
     }
 }

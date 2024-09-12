@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace MakeExeInstaller.Mvvm
@@ -35,8 +36,12 @@ namespace MakeExeInstaller.Mvvm
         public void Execute(object parameter)
         {
             IsRunning = true;
-            OnExecute(parameter).ContinueWith((_) =>
+            OnExecute(parameter).ContinueWith((t) =>
             {
+                if (t.Exception != null)
+                {
+                    MessageBox.Show(t.Exception.InnerException?.Message ?? t.Exception.Message);
+                }
                 IsRunning = false;
             });
         }

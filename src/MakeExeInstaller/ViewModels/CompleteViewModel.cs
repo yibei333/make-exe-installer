@@ -33,14 +33,14 @@ namespace MakeExeInstaller.ViewModels
         {
             if (Run)
             {
-                var exe = RegistryExtension.Get().CombinePath(App.Config.Name).CombinePath("bin").CombinePath(App.Config.ExePath);
+                var exe = RegistryExtension.Get().CombinePath(App.Config.ExePath);
                 if (File.Exists(exe))
                 {
                     var process = new Process
                     {
                         StartInfo = new ProcessStartInfo(exe)
                         {
-                            WorkingDirectory = new FileInfo(exe).DirectoryName
+                            WorkingDirectory = new FileInfo(exe).DirectoryName,
                         }
                     };
                     process.Start();

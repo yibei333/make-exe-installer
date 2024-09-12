@@ -7,6 +7,19 @@ namespace MakeExeInstaller
 {
     public partial class App : Application
     {
+        public App()
+        {
+            this.DispatcherUnhandledException += App_DispatcherUnhandledException;
+
+            //todo:modify taskbar name
+            //todo:add uninstall
+        }
+
+        private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            MessageBox.Show(e.Exception.Message);
+        }
+
         public static Assembly Assembly { get; } = Assembly.GetExecutingAssembly();
         public static string AssemblyName { get; } = Assembly.GetName().Name;
         public static AppConfig Config { get; } = GetConfig();
@@ -28,5 +41,6 @@ namespace MakeExeInstaller
         public string DisplayName { get; set; }
         public string ExePath { get; set; }
         public string Version { get; set; }
+        public string Publisher { get; set; }
     }
 }

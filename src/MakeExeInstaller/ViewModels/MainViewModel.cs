@@ -9,6 +9,7 @@ namespace MakeExeInstaller.ViewModels
     public class MainViewModel : ViewModelBase
     {
         static readonly string _namespace = typeof(MainViewModel).Namespace;
+        string title = "";
         int index = -1;
         bool closeWindowButtonEnabled = true;
         UserControl currentPage;
@@ -24,6 +25,7 @@ namespace MakeExeInstaller.ViewModels
                 CreatePage<Complete,CompleteViewModel>(),
             };
             Index = 0;
+            Title = $"{App.Config.DisplayName}安装程序";
         }
 
         public List<UserControl> Pages { get; }
@@ -38,6 +40,17 @@ namespace MakeExeInstaller.ViewModels
                 currentPage = Pages[index];
                 OnPropertyChanged(nameof(Index));
                 OnPropertyChanged(nameof(CurrentPage));
+            }
+        }
+
+        public string Title
+        {
+            get => title;
+            set
+            {
+                if (title == value) return;
+                title = value;
+                OnPropertyChanged(nameof(Title));
             }
         }
 

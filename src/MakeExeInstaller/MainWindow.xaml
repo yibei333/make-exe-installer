@@ -9,13 +9,14 @@
         WindowStyle="None"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="True"
+        Title="{Binding Title}"
         Background="Transparent" Height="300" Width="500"
         TextElement.Foreground="{StaticResource dark}"
         ResizeMode="NoResize"
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=ViewModel}">
 
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="32"></WindowChrome>
+        <WindowChrome CaptionHeight="32" ></WindowChrome>
     </WindowChrome.WindowChrome>
 
     <Border Background="{StaticResource bagroundBrush}">
@@ -32,7 +33,7 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal">
                         <Image Height="18" Source="/Data/app.ico"/>
-                        <TextBlock Margin="6 0" VerticalAlignment="Center" Foreground="{StaticResource dark}">测试安装程序</TextBlock>
+                        <TextBlock Margin="6 0" VerticalAlignment="Center" Foreground="{StaticResource dark}" Text="{Binding Title}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1">
                         <Button Style="{StaticResource button_error}" 
