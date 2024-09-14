@@ -1,0 +1,1 @@
+﻿signtool sign /debug /f CodeSigning.pfx /p foo /fd SHA256 安装程序.exe

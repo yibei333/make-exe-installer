@@ -1,5 +1,8 @@
 ﻿using MakeExeInstaller.Extensions;
+using System.Diagnostics;
+using System;
 using System.Reflection;
+using System.Security.Principal;
 using System.Text;
 using System.Windows;
 
@@ -9,10 +12,12 @@ namespace MakeExeInstaller
     {
         public App()
         {
+            RequestAdminUAC();
             this.DispatcherUnhandledException += App_DispatcherUnhandledException;
 
             //todo:modify taskbar name
             //todo:add uninstall
+            //sign
         }
 
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
@@ -32,6 +37,31 @@ namespace MakeExeInstaller
             stream.Dispose();
             var json = Encoding.UTF8.GetString(bytes);
             return json.DeSerialize<AppConfig>();
+        }
+
+        static void RequestAdminUAC()
+        {
+            var wi = WindowsIdentity.GetCurrent();
+            var wp = new WindowsPrincipal(wi);
+
+            bool runAsAdmin = wp.IsInRole(WindowsBuiltInRole.Administrator);
+
+            if (!runAsAdmin)
+            {
+                var processInfo = new ProcessStartInfo(Assembly.GetExecutingAssembly().CodeBase);
+                processInfo.UseShellExecute = true;
+                processInfo.Verb = "runas";
+
+                try
+                {
+                    Process.Start(processInfo);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                Environment.Exit(0);
+            }
         }
     }
 
